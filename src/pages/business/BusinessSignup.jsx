@@ -131,13 +131,40 @@ const BusinessSignup = () => {
           yearsInBusiness: formData.yearsInBusiness
         };
 
-        await signup(formData.email, formData.password, businessInfo);
+        // Create user in Supabase Auth
+        const user = await signup(formData.email, formData.password, businessInfo);
 
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          setSuccessMessage('Account created successfully! Please check your email to verify your account.');
+        // Get the user ID (from returned user or from session)
+        let userId = user?.id;
+        if (!userId) {
+          const { data: { session } } = await supabase.auth.getSession();
+          userId = session?.user?.id;
+        }
+
+        // Insert business info into business_profiles table
+        if (userId) {
+          await supabase.from('business_profiles').upsert({
+            user_id: userId,
+            business_name: formData.businessName,
+            industry: formData.industry,
+            location: formData.location,
+            website: formData.website,
+            linkedin: formData.linkedin,
+            instagram: formData.instagram,
+            twitter: formData.twitter,
+            business_size: formData.businessSize,
+            years_in_business: formData.yearsInBusiness,
+            email: formData.email
+          });
+        }
+
+        if (!userId) {
+          setSuccessMessage('Account created! Please check your email to confirm, then log in.');
         } else {
-          navigate('/business/dashboard', { replace: true });
+          setSuccessMessage('Account created! Please check your email to confirm, then log in.');
+          setTimeout(() => {
+            navigate('/business/login', { state: { signupSuccess: true } });
+          }, 2000);
         }
       } catch (error) {
         if (error.message.includes('Email rate limit exceeded')) {

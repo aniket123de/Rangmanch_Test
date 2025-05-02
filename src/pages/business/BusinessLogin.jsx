@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { ThemeContext } from '../../context/ThemeContext';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useBusinessAuth } from './businessAuthContext';
 import BusinessNavbar from '../../components/Navbar/BusinessNavbar';
 
@@ -9,11 +9,19 @@ const BusinessLogin = () => {
   const { isDark } = useContext(ThemeContext);
   const { login, currentUser, loading: authLoading } = useBusinessAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    if (location.state && location.state.signupSuccess) {
+      setSuccessMessage('Account created! Please check your email to confirm, then log in.');
+    }
+  }, [location.state]);
 
   // Redirect if already logged in
   if (!authLoading && currentUser) {
@@ -64,6 +72,12 @@ const BusinessLogin = () => {
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Business Login</h1>
                 <p className="text-gray-600 dark:text-gray-400">Access your business dashboard</p>
               </div>
+
+              {successMessage && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
+                  <span className="block sm:inline">{successMessage}</span>
+                </div>
+              )}
 
               {errorMessage && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">

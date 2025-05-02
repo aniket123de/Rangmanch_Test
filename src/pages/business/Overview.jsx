@@ -1,7 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaChartBar, FaUsers, FaBullhorn, FaCheckCircle, FaFileInvoiceDollar, FaPlus, FaSearch } from 'react-icons/fa';
+import { supabase } from './supabaseClient';
+import { useBusinessAuth } from './businessAuthContext';
 
 const Overview = () => {
+  const { currentUser } = useBusinessAuth();
+  const [businessProfile, setBusinessProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBusinessProfile = async () => {
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('business_profiles')
+        .select('business_name, industry, location')
+        .eq('user_id', currentUser.id)
+        .single();
+      if (data) setBusinessProfile(data);
+      setLoading(false);
+    };
+    fetchBusinessProfile();
+  }, [currentUser]);
+
   // Sample data for dashboard components
   const campaignStats = [
     { label: 'Active Campaigns', value: 3, icon: <FaBullhorn />, color: 'from-[#9d4edd] to-[#c77dff]' },
@@ -29,8 +53,24 @@ const Overview = () => {
     { message: 'Your campaign performance report is ready', time: '2 days ago', read: true, icon: <FaChartBar className="text-[#ff9e00]" /> }
   ];
 
+  if (loading) {
+    return <div className="text-center py-10 text-lg text-gray-500 dark:text-gray-300">Loading business info...</div>;
+  }
+
   return (
     <>
+      {/* Business Info Header */}
+      {businessProfile && (
+        <div className="mb-8 p-6 bg-white dark:bg-gray-800 rounded-2xl shadow flex flex-col md:flex-row md:items-center md:justify-between border border-gray-100 dark:border-gray-700">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{businessProfile.business_name}</h2>
+            <div className="text-gray-600 dark:text-gray-400 text-base">
+              {businessProfile.industry} &bull; {businessProfile.location}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Key Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {campaignStats.map((stat, index) => (
