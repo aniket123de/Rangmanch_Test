@@ -3,6 +3,7 @@ import { ThemeContext } from '../../context/ThemeContext';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useBusinessAuth } from './businessAuthContext';
 import BusinessNavbar from '../../components/Navbar/BusinessNavbar';
+import { supabase } from './supabaseClient';
 
 const BusinessSignup = () => {
   const { isDark } = useContext(ThemeContext);
