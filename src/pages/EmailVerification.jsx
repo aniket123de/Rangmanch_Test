@@ -12,6 +12,7 @@ const EmailVerification = () => {
       try {
         const params = new URLSearchParams(location.search);
         const token = params.get("token");
+        const type = params.get("type"); // Get the type parameter to determine if it's a business verification
         
         if (!token) {
           setVerificationStatus("error");
@@ -24,6 +25,10 @@ const EmailVerification = () => {
         // Temporary simulation of verification
         setTimeout(() => {
           setVerificationStatus("success");
+          // If it's a business verification, redirect to business login
+          if (type === "business") {
+            window.location.href = "https://rangmanch-test.vercel.app/business/login";
+          }
         }, 2000);
       } catch (error) {
         console.error("Email verification failed:", error);
@@ -75,7 +80,15 @@ const EmailVerification = () => {
           <p className="text-center text-gray-600">{content.message}</p>
           {content.buttonText && (
             <button
-              onClick={() => navigate(verificationStatus === "success" ? "/login" : "/signup")}
+              onClick={() => {
+                const params = new URLSearchParams(location.search);
+                const type = params.get("type");
+                if (type === "business") {
+                  window.location.href = "https://rangmanch-test.vercel.app/business/login";
+                } else {
+                  navigate(verificationStatus === "success" ? "/login" : "/signup");
+                }
+              }}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               {content.buttonText}

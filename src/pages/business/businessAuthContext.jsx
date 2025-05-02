@@ -51,46 +51,20 @@ export const BusinessAuthProvider = ({ children }) => {
     }
   };
 
-  const signup = async (email, password, businessInfo) => {
+  // Only create the user and send verification email
+  const signup = async (email, password) => {
     try {
-      // Sign up the user with Supabase
       const { data: { user }, error: signupError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/email-verification?type=business`
+        }
       });
-
       if (signupError) throw signupError;
-
       if (!user) {
         throw new Error('User creation failed. No user returned.');
       }
-
-      // Insert business info into business_profiles table
-      const businessProfile = {
-        user_id: user.id,
-        business_name: businessInfo.businessName,
-        industry: businessInfo.industry,
-        location: businessInfo.location,
-        website: businessInfo.website,
-        linkedin: businessInfo.linkedin,
-        instagram: businessInfo.instagram,
-        twitter: businessInfo.twitter,
-        business_size: businessInfo.businessSize,
-        years_in_business: businessInfo.yearsInBusiness,
-        updated_at: new Date().toISOString(),
-      };
-
-      const { error: insertError } = await supabase
-        .from('business_profiles')
-        .insert(businessProfile);
-
-      if (insertError) {
-        console.error('Error inserting business profile:', insertError);
-        // Optionally, delete the user if profile insertion fails
-        await supabase.auth.admin.deleteUser(user.id);
-        throw new Error('Failed to create business profile: ' + insertError.message);
-      }
-
       return user;
     } catch (error) {
       console.error('Supabase signup error:', error);
@@ -108,8 +82,20 @@ export const BusinessAuthProvider = ({ children }) => {
     }
   };
 
+  const resetPassword = async (email) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/business/reset-password`
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Supabase reset password error:', error);
+      throw error;
+    }
+  };
+
   return (
-    <BusinessAuthContext.Provider value={{ currentUser, login, signup, logout, loading }}>
+    <BusinessAuthContext.Provider value={{ currentUser, login, signup, logout, resetPassword, loading }}>
       {children}
     </BusinessAuthContext.Provider>
   );
