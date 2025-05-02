@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { FaChartBar, FaUsers, FaBullhorn, FaCheckCircle, FaFileInvoiceDollar, FaPlus, FaSearch } from 'react-icons/fa';
 import { supabase } from './supabaseClient';
 import { useBusinessAuth } from './businessAuthContext';
+import BusinessCalendar from './BusinessCalendar';
 
-const Overview = () => {
+const Overview = ({ setActiveTab }) => {
   const { currentUser } = useBusinessAuth();
   const [businessProfile, setBusinessProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -192,25 +193,15 @@ const Overview = () => {
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Upcoming Schedule</h3>
-            <button className="text-sm text-white bg-gradient-to-r from-[#9d4edd] to-[#c77dff] px-3 py-2 rounded-lg hover:opacity-90 transition-opacity">
+            <button
+              className="text-sm text-white bg-gradient-to-r from-[#9d4edd] to-[#c77dff] px-3 py-2 rounded-lg hover:opacity-90 transition-opacity"
+              onClick={() => setActiveTab && setActiveTab('calendar')}
+            >
               Full Calendar
             </button>
           </div>
-          <div className="space-y-4">
-            {upcomingSchedule.map((item, index) => (
-              <div key={index} className="flex items-start p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                  {item.icon}
-                </div>
-                <div className="flex-1">
-                  <p className="text-gray-800 dark:text-gray-200 font-medium">{item.event}</p>
-                  <div className="flex justify-between mt-1">
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">{item.date}</p>
-                    <p className="text-[#9d4edd] dark:text-[#c77dff] text-sm">{item.creator}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div>
+            <BusinessCalendar />
           </div>
         </div>
       </div>

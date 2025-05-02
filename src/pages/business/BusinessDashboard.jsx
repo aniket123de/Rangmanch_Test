@@ -6,6 +6,7 @@ import BusinessNavbar from '../../components/Navbar/BusinessNavbar';
 import Overview from './Overview';
 import BusinessInfo from './BusinessInfo';
 import Pricing from './Pricing';
+import BusinessCalendar from './BusinessCalendar';
 import { 
   FaChartBar, 
   FaUsers, 
@@ -71,11 +72,13 @@ const BusinessDashboard = () => {
           >
             Pricing
           </button>
+          
         </div>
 
         {activeTab === 'overview' && <Overview />}
         {activeTab === 'businessInfo' && <BusinessInfo />}
         {activeTab === 'pricing' && <Pricing />}
+              
       </div>
     </div>
   );
