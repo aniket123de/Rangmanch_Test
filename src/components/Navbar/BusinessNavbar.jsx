@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaBuilding } from 'react-icons/fa';
 import Icon from '../../assets/icon.png';
-import { useBusinessAuth } from '../../contexts/businessAuthContext';
+import { useBusinessAuth } from '../../pages/business/businessAuthContext';
 import { useAuth } from '../../contexts/authContext';
 
 const StyledWrapper = styled.div`
@@ -119,9 +119,8 @@ const BusinessNavbar = () => {
 
       // Handle page visibility change
       const handleVisibilityChange = async () => {
-        if (document.hidden && businessUser) {
-          await handleLogout();
-        }
+        // Remove the automatic logout on page visibility change
+        // This was causing the constant logout issue
       };
 
       // Add event listeners
@@ -147,24 +146,12 @@ const BusinessNavbar = () => {
   // Handle page refresh or close
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (businessUser) {
-        // Store a flag in sessionStorage
-        sessionStorage.setItem('shouldLogout', 'true');
-      }
-    };
-
-    // Check for stored logout flag on mount
-    const checkStoredLogout = () => {
-      const shouldLogout = sessionStorage.getItem('shouldLogout');
-      if (shouldLogout === 'true' && businessUser) {
-        handleLogout();
-        sessionStorage.removeItem('shouldLogout');
-      }
+      // Remove the automatic logout on page refresh
+      // This was causing unnecessary logouts
     };
 
     if (typeof window !== 'undefined') {
       window.addEventListener('beforeunload', handleBeforeUnload);
-      checkStoredLogout();
 
       return () => {
         window.removeEventListener('beforeunload', handleBeforeUnload);

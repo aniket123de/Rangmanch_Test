@@ -31,7 +31,7 @@ import ScrollProgressBar from './components/common/ScrollProgressBar';
 import { LoadingProvider } from './contexts/LoadingContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/authContext';
-import { BusinessAuthProvider } from './contexts/businessAuthContext';
+import { BusinessAuthProvider } from './pages/business/businessAuthContext';
 import { ChatbotProvider } from './context/ChatbotContext'; // Add this line
 
 // Import common components

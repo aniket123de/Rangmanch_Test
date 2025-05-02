@@ -1,18 +1,24 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { ThemeContext } from '../../context/ThemeContext';
-import { Link, Navigate } from 'react-router-dom';
-import { useBusinessAuth } from '../../contexts/businessAuthContext';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { useBusinessAuth } from './businessAuthContext';
 import BusinessNavbar from '../../components/Navbar/BusinessNavbar';
 
 const BusinessLogin = () => {
   const { isDark } = useContext(ThemeContext);
-  const { login, currentUser } = useBusinessAuth();
+  const { login, currentUser, loading: authLoading } = useBusinessAuth();
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Redirect if already logged in
+  if (!authLoading && currentUser) {
+    return <Navigate to="/business/dashboard" replace={true} />;
+  }
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -21,17 +27,34 @@ const BusinessLogin = () => {
         setIsSigningIn(true);
         setErrorMessage('');
         await login(email, password);
+        // Redirect to dashboard after successful login
+        navigate('/business/dashboard', { replace: true });
       } catch (error) {
-        setErrorMessage(error.message);
+        // Handle Supabase-specific errors
+        if (error.message.includes('Invalid login credentials')) {
+          setErrorMessage('Invalid email or password. Please try again.');
+        } else if (error.message.includes('Email not confirmed')) {
+          setErrorMessage('Please verify your email before logging in.');
+        } else {
+          setErrorMessage(error.message || 'An error occurred during login. Please try again.');
+        }
       } finally {
         setIsSigningIn(false);
       }
     }
+  };
+
+  // Show loading state while auth context is initializing
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-black">
+        <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+      </div>
+    );
   }
 
   return (
     <>
-      {currentUser && <Navigate to="/business/dashboard" replace={true} />}
       <BusinessNavbar />
       <div className="min-h-screen bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-black transition-colors duration-300 pt-32">
         <div className="container mx-auto px-4">
@@ -116,4 +139,4 @@ const BusinessLogin = () => {
   );
 };
 
-export default BusinessLogin; 
+export default BusinessLogin;

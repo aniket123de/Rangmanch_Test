@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { Link } from 'react-router-dom';
-import { useBusinessAuth } from '../../contexts/businessAuthContext';
+import { useBusinessAuth } from './businessAuthContext';
 import BusinessNavbar from '../../components/Navbar/BusinessNavbar';
 
 const BusinessForgotPassword = () => {

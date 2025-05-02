@@ -1,12 +1,13 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
-import { Link, Navigate } from 'react-router-dom';
-import { useBusinessAuth } from '../../contexts/businessAuthContext';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { useBusinessAuth } from './businessAuthContext';
 import BusinessNavbar from '../../components/Navbar/BusinessNavbar';
 
 const BusinessSignup = () => {
   const { isDark } = useContext(ThemeContext);
-  const { signup, currentUser } = useBusinessAuth();
+  const { signup, currentUser, loading: authLoading } = useBusinessAuth();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     businessName: '',
@@ -34,6 +35,8 @@ const BusinessSignup = () => {
 
   const [isSigningUp, setIsSigningUp] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [cooldown, setCooldown] = useState(0);
 
   const checkPasswordStrength = (password) => {
     const strength = {
@@ -45,7 +48,6 @@ const BusinessSignup = () => {
       hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
     };
 
-    // Calculate score
     if (strength.hasLength) strength.score++;
     if (strength.hasUppercase) strength.score++;
     if (strength.hasLowercase) strength.score++;
@@ -57,9 +59,14 @@ const BusinessSignup = () => {
 
   const getPasswordStrengthColor = () => {
     const { score } = passwordStrength;
-    if (score <= 2) return '#ef4444'; // red for weak
-    if (score <= 4) return '#eab308'; // yellow for moderate
-    return '#22c55e'; // green for strong
+    if (score <= 2) return '#ef4444';
+    if (score <= 4) return '#eab308';
+    return '#22c55e';
+  };
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
   const handleChange = (e) => {
@@ -74,18 +81,43 @@ const BusinessSignup = () => {
     }
   };
 
+  useEffect(() => {
+    let timer;
+    if (cooldown > 0) {
+      timer = setInterval(() => {
+        setCooldown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!isSigningUp && formData.email && formData.password) {
+    if (isSigningUp || cooldown > 0) {
+      return;
+    }
+
+    if (formData.email && formData.password) {
+      if (!validateEmail(formData.email)) {
+        setErrorMessage('Please enter a valid email address.');
+        return;
+      }
+
       if (formData.password !== formData.confirmPassword) {
         setErrorMessage('Passwords do not match');
         return;
       }
+
+      if (formData.password.length < 6) {
+        setErrorMessage('Password must be at least 6 characters long.');
+        return;
+      }
+
       try {
         setIsSigningUp(true);
         setErrorMessage('');
-        
-        // Create business info object without sensitive data
+        setSuccessMessage('');
+
         const businessInfo = {
           businessName: formData.businessName,
           industry: formData.industry,
@@ -99,17 +131,46 @@ const BusinessSignup = () => {
         };
 
         await signup(formData.email, formData.password, businessInfo);
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          setSuccessMessage('Account created successfully! Please check your email to verify your account.');
+        } else {
+          navigate('/business/dashboard', { replace: true });
+        }
       } catch (error) {
-        setErrorMessage(error.message);
+        if (error.message.includes('Email rate limit exceeded')) {
+          setErrorMessage(`Too many signup attempts. Please try again in ${cooldown || 14} seconds.`);
+          setCooldown(14);
+        } else if (error.message.includes('User already registered')) {
+          setErrorMessage('This email is already registered. Please log in instead.');
+        } else if (error.message.includes('Password should be at least 6 characters')) {
+          setErrorMessage('Password must be at least 6 characters long.');
+        } else if (error.message.includes('invalid')) {
+          setErrorMessage('Please enter a valid email address.');
+        } else {
+          setErrorMessage(error.message || 'An error occurred during signup. Please try again.');
+        }
       } finally {
         setIsSigningUp(false);
       }
     }
   };
 
+  if (!authLoading && currentUser) {
+    return <Navigate to="/business/dashboard" replace={true} />;
+  }
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-black">
+        <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <>
-      {currentUser && <Navigate to="/business/dashboard" replace={true} />}
       <BusinessNavbar />
       <div className="min-h-screen bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-black transition-colors duration-300 pt-32">
         <div className="container mx-auto px-4">
@@ -126,6 +187,12 @@ const BusinessSignup = () => {
                 </div>
               )}
 
+              {successMessage && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
+                  <span className="block sm:inline">{successMessage}</span>
+                </div>
+              )}
+
               <form onSubmit={onSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -138,6 +205,7 @@ const BusinessSignup = () => {
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                       placeholder="Enter your business name"
                       required
+                      disabled={isSigningUp || cooldown > 0}
                     />
                   </div>
 
@@ -151,6 +219,7 @@ const BusinessSignup = () => {
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                       placeholder="Enter your industry"
                       required
+                      disabled={isSigningUp || cooldown > 0}
                     />
                   </div>
 
@@ -164,6 +233,7 @@ const BusinessSignup = () => {
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                       placeholder="Enter your location"
                       required
+                      disabled={isSigningUp || cooldown > 0}
                     />
                   </div>
 
@@ -177,6 +247,7 @@ const BusinessSignup = () => {
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                       placeholder="Enter your business email"
                       required
+                      disabled={isSigningUp || cooldown > 0}
                     />
                   </div>
 
@@ -190,6 +261,7 @@ const BusinessSignup = () => {
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                       placeholder="Create a password"
                       required
+                      disabled={isSigningUp || cooldown > 0}
                     />
                     {formData.password && (
                       <div className="mt-2">
@@ -225,6 +297,7 @@ const BusinessSignup = () => {
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                       placeholder="Confirm your password"
                       required
+                      disabled={isSigningUp || cooldown > 0}
                     />
                   </div>
 
@@ -237,6 +310,7 @@ const BusinessSignup = () => {
                       onChange={handleChange}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                       placeholder="Enter your website URL"
+                      disabled={isSigningUp || cooldown > 0}
                     />
                   </div>
 
@@ -249,6 +323,7 @@ const BusinessSignup = () => {
                       onChange={handleChange}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                       placeholder="Enter your LinkedIn profile"
+                      disabled={isSigningUp || cooldown > 0}
                     />
                   </div>
 
@@ -261,6 +336,7 @@ const BusinessSignup = () => {
                       onChange={handleChange}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                       placeholder="Enter your Instagram handle"
+                      disabled={isSigningUp || cooldown > 0}
                     />
                   </div>
 
@@ -273,6 +349,7 @@ const BusinessSignup = () => {
                       onChange={handleChange}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                       placeholder="Enter your Twitter handle"
+                      disabled={isSigningUp || cooldown > 0}
                     />
                   </div>
 
@@ -284,6 +361,7 @@ const BusinessSignup = () => {
                       onChange={handleChange}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                       required
+                      disabled={isSigningUp || cooldown > 0}
                     >
                       <option value="">Select business size</option>
                       <option value="1-10">1-10 employees</option>
@@ -302,6 +380,7 @@ const BusinessSignup = () => {
                       onChange={handleChange}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-purple-500 dark:bg-gray-700 dark:text-white"
                       required
+                      disabled={isSigningUp || cooldown > 0}
                     >
                       <option value="">Select years in business</option>
                       <option value="0-1">0-1 years</option>
@@ -315,10 +394,10 @@ const BusinessSignup = () => {
 
                 <button
                   type="submit"
-                  disabled={isSigningUp}
+                  disabled={isSigningUp || cooldown > 0}
                   className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50"
                 >
-                  {isSigningUp ? 'Creating Account...' : 'Create Account'}
+                  {isSigningUp ? 'Creating Account...' : cooldown > 0 ? `Retry in ${cooldown}s` : 'Create Account'}
                 </button>
               </form>
 
@@ -338,4 +417,4 @@ const BusinessSignup = () => {
   );
 };
 
-export default BusinessSignup; 
+export default BusinessSignup;

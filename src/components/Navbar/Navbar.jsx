@@ -7,7 +7,7 @@ import ProfileSidebar from './ProfileSidebar';
 import Icon from '../../assets/icon.png';
 import { useAuth } from '../../contexts/authContext';
 import AnimatedButton from '../common/AnimatedButton';
-import { useBusinessAuth } from '../../contexts/businessAuthContext';
+import { useBusinessAuth } from '../../pages/business/businessAuthContext'; 
 
 const StyledWrapper = styled.div`
   /* === removing default button style ===*/
