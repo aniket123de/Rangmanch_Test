@@ -58,7 +58,7 @@ export const BusinessAuthProvider = ({ children }) => {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/email-verification?type=business`
+          emailRedirectTo: 'https://rangmanch-test.vercel.app/email-verification?type=business'
         }
       });
       if (signupError) throw signupError;
