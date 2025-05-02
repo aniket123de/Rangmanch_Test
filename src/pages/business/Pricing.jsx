@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaRegClock, FaRegCreditCard, FaLock, FaCheckCircle } from 'react-icons/fa';
 
 const Pricing = () => {
+  const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' or 'annual'
+
   const pricingPlans = [
     {
       name: 'Starter',
-      price: '₹9,999',
-      billing: 'monthly',
+      monthlyPrice: '₹999',
+      annualPrice: '₹9,599',
       description: 'Perfect for small businesses entering the creator space',
       features: [
         'Access to 100+ creators',
@@ -21,8 +23,8 @@ const Pricing = () => {
     },
     {
       name: 'Growth',
-      price: '₹24,999',
-      billing: 'monthly',
+      monthlyPrice: '₹3,999',
+      annualPrice: '₹38,399',
       description: 'Ideal for growing brands looking to scale creator marketing',
       features: [
         'Access to 500+ creators',
@@ -38,8 +40,8 @@ const Pricing = () => {
     },
     {
       name: 'Enterprise',
-      price: '₹49,999',
-      billing: 'monthly',
+      monthlyPrice: '₹5,999',
+      annualPrice: '₹57,599',
       description: 'Comprehensive solution for established brands',
       features: [
         'Unlimited access to creators',
@@ -66,10 +68,24 @@ const Pricing = () => {
         
         <div className="flex justify-center mt-6">
           <div className="bg-gray-100 dark:bg-gray-700 p-1 rounded-lg inline-flex">
-            <button className="px-4 py-2 bg-white dark:bg-gray-800 rounded-md shadow-sm text-gray-900 dark:text-white font-medium">
+            <button 
+              onClick={() => setBillingCycle('monthly')}
+              className={`px-4 py-2 rounded-md shadow-sm font-medium ${
+                billingCycle === 'monthly' 
+                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
+                  : 'text-gray-600 dark:text-gray-300'
+              }`}
+            >
               Monthly
             </button>
-            <button className="px-4 py-2 text-gray-600 dark:text-gray-300 font-medium">
+            <button 
+              onClick={() => setBillingCycle('annual')}
+              className={`px-4 py-2 rounded-md shadow-sm font-medium ${
+                billingCycle === 'annual' 
+                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
+                  : 'text-gray-600 dark:text-gray-300'
+              }`}
+            >
               Annual (Save 20%)
             </button>
           </div>
@@ -101,8 +117,12 @@ const Pricing = () => {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{plan.name}</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">{plan.description}</p>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{plan.price}</div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">{plan.billing}</p>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                {billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice}
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                {billingCycle === 'monthly' ? 'per month' : 'per year (20% savings)'}
+              </p>
               <ul className="space-y-3 mb-8">
                 {plan.features.map((feature, featureIndex) => (
                   <li key={featureIndex} className="text-gray-600 dark:text-gray-400 flex items-start gap-2">
