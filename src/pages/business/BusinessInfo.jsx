@@ -302,69 +302,77 @@ const BusinessInfo = () => {
 
       {/* Brand Assets */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-8 border border-gray-100 dark:border-gray-700">
-        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Brand Assets</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 bg-gradient-to-br from-[#9d4edd]/10 to-[#c77dff]/10 dark:from-[#9d4edd]/20 dark:to-[#c77dff]/20 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-md transition-all">
-            <label htmlFor="logo-upload" className="cursor-pointer">
-              <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center text-[#9d4edd] dark:text-[#c77dff] mb-4 shadow-sm">
-                {formData.logo_url ? (
-                  <img src={formData.logo_url} alt="Logo" className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <FaUpload className="w-8 h-8" />
-                )}
-              </div>
-              <h3 className="font-medium text-gray-900 dark:text-white mb-1">Upload Logo</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">Add your brand logo</p>
-              <input
-                id="logo-upload"
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileUpload(e, 'logo_url')}
-                className="hidden"
-              />
-            </label>
-          </div>
-          <div className="p-6 bg-gradient-to-br from-[#ff9e00]/10 to-[#ddff00]/10 dark:from-[#ff9e00]/20 dark:to-[#ddff00]/20 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-md transition-all">
-            <label htmlFor="brand-images-upload" className="cursor-pointer">
-              <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center text-[#ff9e00] dark:text-[#ddff00] mb-4 shadow-sm">
-                {formData.brand_images_url ? (
-                  <img src={formData.brand_images_url} alt="Brand Images" className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <FaUpload className="w-8 h-8" />
-                )}
-              </div>
-              <h3 className="font-medium text-gray-900 dark:text-white mb-1">Brand Images</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">Manage your brand assets</p>
-              <input
-                id="brand-images-upload"
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileUpload(e, 'brand_images_url')}
-                className="hidden"
-              />
-            </label>
-          </div>
-          <div className="p-6 bg-gradient-to-br from-[#9d4edd]/10 to-[#ff9e00]/10 dark:from-[#9d4edd]/20 dark:to-[#ff9e00]/20 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-md transition-all">
-            <label htmlFor="brand-guidelines-upload" className="cursor-pointer">
-              <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center text-[#9d4edd] dark:text-[#ff9e00] mb-4 shadow-sm">
-                {formData.brand_guidelines_url ? (
-                  <img src={formData.brand_guidelines_url} alt="Brand Guidelines" className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <FaUpload className="w-8 h-8" />
-                )}
-              </div>
-              <h3 className="font-medium text-gray-900 dark:text-white mb-1">Brand Guidelines</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">Upload brand documentation</p>
-              <input
-                id="brand-guidelines-upload"
-                type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={(e) => handleFileUpload(e, 'brand_guidelines_url')}
-                className="hidden"
-              />
-            </label>
-          </div>
+  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Brand Assets</h2>
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="p-6 bg-gradient-to-br from-[#9d4edd]/10 to-[#c77dff]/10 dark:from-[#9d4edd]/20 dark:to-[#c77dff]/20 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-md transition-all">
+      <label htmlFor="logo-upload" className="cursor-pointer w-full flex flex-col items-center">
+        <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center text-[#9d4edd] dark:text-[#c77dff] mb-4 shadow-sm">
+          {formData.logo_url ? (
+            <img src={formData.logo_url} alt="Logo" className="w-full h-full rounded-full object-cover" />
+          ) : (
+            <div className="flex items-center justify-center w-full h-full">
+              <FaUpload className="w-8 h-8" />
+            </div>
+          )}
         </div>
+        <h3 className="font-medium text-gray-900 dark:text-white mb-1">Upload Logo</h3>
+        <p className="text-gray-500 dark:text-gray-400 text-sm">Add your brand logo</p>
+        <input
+          id="logo-upload"
+          type="file"
+          accept="image/*"
+          onChange={(e) => handleFileUpload(e, 'logo_url')}
+          className="hidden"
+        />
+      </label>
+    </div>
+
+    <div className="p-6 bg-gradient-to-br from-[#ff9e00]/10 to-[#ddff00]/10 dark:from-[#ff9e00]/20 dark:to-[#ddff00]/20 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-md transition-all">
+      <label htmlFor="brand-images-upload" className="cursor-pointer w-full flex flex-col items-center">
+        <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center text-[#ff9e00] dark:text-[#ddff00] mb-4 shadow-sm">
+          {formData.brand_images_url ? (
+            <img src={formData.brand_images_url} alt="Brand Images" className="w-full h-full rounded-full object-cover" />
+          ) : (
+            <div className="flex items-center justify-center w-full h-full">
+              <FaUpload className="w-8 h-8" />
+            </div>
+          )}
+        </div>
+        <h3 className="font-medium text-gray-900 dark:text-white mb-1">Brand Images</h3>
+        <p className="text-gray-500 dark:text-gray-400 text-sm">Manage your brand assets</p>
+        <input
+          id="brand-images-upload"
+          type="file"
+          accept="image/*"
+          onChange={(e) => handleFileUpload(e, 'brand_images_url')}
+          className="hidden"
+        />
+      </label>
+    </div>
+
+    <div className="p-6 bg-gradient-to-br from-[#9d4edd]/10 to-[#ff9e00]/10 dark:from-[#9d4edd]/20 dark:to-[#ff9e00]/20 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-md transition-all">
+      <label htmlFor="brand-guidelines-upload" className="cursor-pointer w-full flex flex-col items-center">
+        <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center text-[#9d4edd] dark:text-[#ff9e00] mb-4 shadow-sm">
+          {formData.brand_guidelines_url ? (
+            <img src={formData.brand_guidelines_url} alt="Brand Guidelines" className="w-full h-full rounded-full object-cover" />
+          ) : (
+            <div className="flex items-center justify-center w-full h-full">
+              <FaUpload className="w-8 h-8" />
+            </div>
+          )}
+        </div>
+        <h3 className="font-medium text-gray-900 dark:text-white mb-1">Brand Guidelines</h3>
+        <p className="text-gray-500 dark:text-gray-400 text-sm">Upload brand documentation</p>
+        <input
+          id="brand-guidelines-upload"
+          type="file"
+          accept=".pdf,.doc,.docx"
+          onChange={(e) => handleFileUpload(e, 'brand_guidelines_url')}
+          className="hidden"
+        />
+      </label>
+    </div>
+  </div>
       </div>
     </form>
   );
